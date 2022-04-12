@@ -69,6 +69,12 @@ public class ExtTelephonyManager {
     private AtomicBoolean mServiceConnected = new AtomicBoolean();
 
     /**
+     * This represents the state of the SIM before SIM_STATE_LOADED, when only the
+     * essential records have been loaded.
+     */
+    public static final String SIM_STATE_ESSENTIAL_RECORDS_LOADED = "ESSENTIAL_LOADED";
+
+    /**
      * Intent action broadcasted when Sms Callback Mode changed.
      */
     public static final String ACTION_SMS_CALLBACK_MODE_CHANGED =
@@ -220,7 +226,6 @@ public class ExtTelephonyManager {
         for (ServiceCallback cb : mServiceCbs) {
             cb.onDisconnected();
         }
-        mServiceCbs.clear();
     }
 
     /**
@@ -841,6 +846,21 @@ public class ExtTelephonyManager {
             e.printStackTrace();
         }
         return token;
+    }
+
+    public boolean isEpdgOverCellularDataSupported(int slot) throws RemoteException {
+        boolean support = false;
+        if (!isServiceConnected()) {
+            Log.e(LOG_TAG, "service not connected!");
+            return support;
+        }
+        try {
+            support = mExtTelephonyService.isEpdgOverCellularDataSupported(slot);
+        } catch(RemoteException e) {
+            Log.e(LOG_TAG, "isEpdgOverCellularDataSupported, remote exception");
+            e.printStackTrace();
+        }
+        return support;
     }
 
     public Client registerCallback(String packageName, IExtPhoneCallback callback) {
